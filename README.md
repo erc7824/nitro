@@ -1,66 +1,56 @@
-## Foundry
+# ERC-7824 Reference Implementation
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This repository is a reference implementation of [ERC-7824](./erc-7824.md), providing a framework for off-chain state channels with built-in dispute resolution and asset management. It features:
 
-Foundry consists of:
+• Core interfaces for channel definitions and dispute resolution (INitroAdjudicator, IForceMove, IMultiAssetHolder, etc.)  
+• Example usage of Nitro-based state channels  
+• An optional application pattern (e.g., CountingApp) demonstrating how to extend the framework  
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Architecture Overview
 
-## Documentation
+Below is a high-level diagram of how the interfaces in this repository relate to one another:
 
-https://book.getfoundry.sh/
+```mermaid
+flowchart LR
+    subgraph NitroAdjudicator
+        A[INitroAdjudicator] --> B[IMultiAssetHolder]
+        A --> C[IForceMove]
+    end
 
-## Usage
+    subgraph ForceMove
+        C --> D[INitroTypes]
+        E[IForceMoveApp] --> D
+    end
 
-### Build
-
-```shell
-$ forge build
+    F[IStatusManager]:::gray
 ```
 
-### Test
+Note:  
+• INitroAdjudicator extends IForceMove & IMultiAssetHolder.  
+• IForceMove and IForceMoveApp rely on the data types in INitroTypes.  
+• IStatusManager provides status-tracking (e.g., channel lifecycle).  
 
-```shell
-$ forge test
+## Foundry Usage
+
+This project uses Foundry (a fast and portable toolkit for Ethereum application development written in Rust).
+
+• Forge → build, test, and manage your Solidity projects (similar to Truffle, Hardhat, or DappTools).  
+• Cast → Swiss army knife for interacting with on-chain data.  
+• Anvil → Local Ethereum node (similar to Ganache or Hardhat Network).  
+• Chisel → Fast and verbose Solidity REPL.
+
+Below are common commands:
+
+### Build and test
+```bash
+forge build
+forge test
 ```
 
-### Format
+## Contributing
 
-```shell
-$ forge fmt
-```
+Contributions, issues, and pull requests are welcome! Feel free to explore, experiment, and extend this framework to suit various off-chain state channel use cases.
 
-### Gas Snapshots
+## License
 
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+All code is released under an MIT open-source license. See LICENSE for details.
