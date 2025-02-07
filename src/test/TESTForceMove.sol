@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ForceMove} from '../ForceMove.sol';
+import {ForceMove} from "../ForceMove.sol";
 
 /**
  * @dev This contract extends the ForceMove contract to enable it to be more easily unit-tested. It exposes public or external functions that set storage variables or wrap otherwise internal functions. It should not be deployed in a production environment.
@@ -15,10 +15,7 @@ contract TESTForceMove is ForceMove {
      * @param addresses A line-up of possible perpetrators.
      * @return true if the address is in the array, false otherwise
      */
-    function isAddressInArray(
-        address suspect,
-        address[] memory addresses
-    ) public pure returns (bool) {
+    function isAddressInArray(address suspect, address[] memory addresses) public pure returns (bool) {
         return _isAddressInArray(suspect, addresses);
     }
 
@@ -32,8 +29,7 @@ contract TESTForceMove is ForceMove {
     function setStatusFromChannelData(bytes32 channelId, ChannelData memory channelData) public {
         if (channelData.finalizesAt == 0) {
             require(
-                channelData.stateHash == bytes32(0) && channelData.outcomeHash == bytes32(0),
-                'Invalid open channel'
+                channelData.stateHash == bytes32(0) && channelData.outcomeHash == bytes32(0), "Invalid open channel"
             );
         }
 
@@ -53,9 +49,7 @@ contract TESTForceMove is ForceMove {
      * @dev Wrapper for otherwise internal function. Hashes the input data and formats it for on chain storage.
      * @param channelData ChannelData data.
      */
-    function generateStatus(
-        ChannelData memory channelData
-    ) public pure returns (bytes32 newStatus) {
+    function generateStatus(ChannelData memory channelData) public pure returns (bytes32 newStatus) {
         return _generateStatus(channelData);
     }
 

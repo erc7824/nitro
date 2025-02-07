@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
-import {StrictTurnTaking} from '../libraries/signature-logic/StrictTurnTaking.sol';
-import {IForceMoveApp} from '../interfaces/IForceMoveApp.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {StrictTurnTaking} from "../libraries/signature-logic/StrictTurnTaking.sol";
+import {IForceMoveApp} from "../interfaces/IForceMoveApp.sol";
 
 /**
  * @dev The SingleAssetPayments contract complies with the ForceMoveApp interface, uses strict turn taking logic and implements a simple payment channel with a single asset type only.
@@ -27,22 +27,16 @@ contract SingleAssetPayments is IForceMoveApp {
             _requireValidOutcome(fixedPart.participants.length, proof[i].variablePart.outcome);
 
             if (i > 0) {
-                _requireValidTransition(
-                    fixedPart.participants.length,
-                    proof[i - 1].variablePart,
-                    proof[i].variablePart
-                );
+                _requireValidTransition(fixedPart.participants.length, proof[i - 1].variablePart, proof[i].variablePart);
             }
         }
 
         _requireValidOutcome(fixedPart.participants.length, candidate.variablePart.outcome);
 
         _requireValidTransition(
-            fixedPart.participants.length,
-            proof[proof.length - 1].variablePart,
-            candidate.variablePart
+            fixedPart.participants.length, proof[proof.length - 1].variablePart, candidate.variablePart
         );
-        return (true, '');
+        return (true, "");
     }
 
     /**
@@ -51,23 +45,17 @@ contract SingleAssetPayments is IForceMoveApp {
      * @param nParticipants Number of participants in a channel.
      * @param outcome Outcome to check.
      */
-    function _requireValidOutcome(
-        uint256 nParticipants,
-        Outcome.SingleAssetExit[] memory outcome
-    ) internal pure {
+    function _requireValidOutcome(uint256 nParticipants, Outcome.SingleAssetExit[] memory outcome) internal pure {
         // Throws if more than one asset
-        require(outcome.length == 1, 'outcome: Only one asset allowed');
+        require(outcome.length == 1, "outcome: Only one asset allowed");
 
         // Throws unless that allocation has exactly n outcomes
         Outcome.Allocation[] memory allocations = outcome[0].allocations;
 
-        require(allocations.length == nParticipants, '|Allocation|!=|participants|');
+        require(allocations.length == nParticipants, "|Allocation|!=|participants|");
 
         for (uint256 i = 0; i < nParticipants; i++) {
-            require(
-                allocations[i].allocationType == uint8(Outcome.AllocationType.simple),
-                'not a simple allocation'
-            );
+            require(allocations[i].allocationType == uint8(Outcome.AllocationType.simple), "not a simple allocation");
         }
     }
 
@@ -78,11 +66,10 @@ contract SingleAssetPayments is IForceMoveApp {
      * @param a Variable part to progress from.
      * @param b Variable part to progress to.
      */
-    function _requireValidTransition(
-        uint256 nParticipants,
-        VariablePart memory a,
-        VariablePart memory b
-    ) internal pure {
+    function _requireValidTransition(uint256 nParticipants, VariablePart memory a, VariablePart memory b)
+        internal
+        pure
+    {
         Outcome.Allocation[] memory allocationsA = a.outcome[0].allocations;
         Outcome.Allocation[] memory allocationsB = b.outcome[0].allocations;
 
@@ -94,19 +81,13 @@ contract SingleAssetPayments is IForceMoveApp {
         uint256 allocationSumA;
         uint256 allocationSumB;
         for (uint256 i = 0; i < nParticipants; i++) {
-            require(
-                allocationsB[i].destination == allocationsA[i].destination,
-                'Destinations may not change'
-            );
+            require(allocationsB[i].destination == allocationsA[i].destination, "Destinations may not change");
             allocationSumA += allocationsA[i].amount;
             allocationSumB += allocationsB[i].amount;
             if (i != b.turnNum % nParticipants) {
-                require(
-                    allocationsB[i].amount >= allocationsA[i].amount,
-                    'Nonmover balance decreased'
-                );
+                require(allocationsB[i].amount >= allocationsA[i].amount, "Nonmover balance decreased");
             }
         }
-        require(allocationSumA == allocationSumB, 'Total allocated cannot change');
+        require(allocationSumA == allocationSumB, "Total allocated cannot change");
     }
 }

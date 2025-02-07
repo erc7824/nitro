@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
-import {StrictTurnTaking} from '../libraries/signature-logic/StrictTurnTaking.sol';
-import {IForceMoveApp} from '../interfaces/IForceMoveApp.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {StrictTurnTaking} from "../libraries/signature-logic/StrictTurnTaking.sol";
+import {IForceMoveApp} from "../interfaces/IForceMoveApp.sol";
 
 /**
  * @dev The HashLockedSwap contract complies with the ForceMoveApp interface, uses strict turn taking logic and implements a HashLockedSwapped payment.
@@ -39,8 +39,8 @@ contract HashLockedSwap is IForceMoveApp {
         VariablePart memory to = candidate.variablePart;
 
         // is this the first and only swap?
-        require(proof.length == 1, 'proof.length!=1');
-        require(to.turnNum == 4, 'latest turn number != 4');
+        require(proof.length == 1, "proof.length!=1");
+        require(to.turnNum == 4, "latest turn number != 4");
 
         VariablePart memory from = proof[0].variablePart;
 
@@ -56,7 +56,7 @@ contract HashLockedSwap is IForceMoveApp {
         bytes memory preImage = appData(to.appData).preImage;
 
         // is the preimage correct?
-        require(sha256(preImage) == h, 'incorrect preimage');
+        require(sha256(preImage) == h, "incorrect preimage");
         // NOTE ON GAS COSTS
         // The gas cost of hashing depends on the choice of hash function
         // and the length of the the preImage.
@@ -66,29 +66,30 @@ contract HashLockedSwap is IForceMoveApp {
 
         // slots for each participant unchanged
         require(
-            allocationsA[0].destination == allocationsB[0].destination &&
-                allocationsA[1].destination == allocationsB[1].destination,
-            'destinations may not change'
+            allocationsA[0].destination == allocationsB[0].destination
+                && allocationsA[1].destination == allocationsB[1].destination,
+            "destinations may not change"
         );
 
         // was the payment made?
         require(
-            allocationsA[0].amount == allocationsB[1].amount &&
-                allocationsA[1].amount == allocationsB[0].amount,
-            'amounts must be permuted'
+            allocationsA[0].amount == allocationsB[1].amount && allocationsA[1].amount == allocationsB[0].amount,
+            "amounts must be permuted"
         );
 
-        return (true, '');
+        return (true, "");
     }
 
-    function decode2PartyAllocation(
-        Outcome.SingleAssetExit[] memory outcome
-    ) private pure returns (Outcome.Allocation[] memory allocations) {
+    function decode2PartyAllocation(Outcome.SingleAssetExit[] memory outcome)
+        private
+        pure
+        returns (Outcome.Allocation[] memory allocations)
+    {
         Outcome.SingleAssetExit memory assetOutcome = outcome[0];
 
         allocations = assetOutcome.allocations; // TODO should we check each allocation is a "simple" one?
 
         // Throws unless there are exactly 2 allocations
-        require(allocations.length == 2, 'allocation.length != 2');
+        require(allocations.length == 2, "allocation.length != 2");
     }
 }

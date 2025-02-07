@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
-import {IMultiAssetHolder} from './IMultiAssetHolder.sol';
-import {IForceMove} from './IForceMove.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {IMultiAssetHolder} from "./IMultiAssetHolder.sol";
+import {IForceMove} from "./IForceMove.sol";
 
 /**
  * @dev The INitroAdjudicator defines an interface for a contract that adjudicates state channels. It is based on IMultiAssetHolder and IForceMove, extending them with some functions.
@@ -15,10 +15,7 @@ interface INitroAdjudicator is IMultiAssetHolder, IForceMove {
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param candidate Variable part of the state to change to.
      */
-    function concludeAndTransferAllAssets(
-        FixedPart memory fixedPart,
-        SignedVariablePart memory candidate
-    ) external;
+    function concludeAndTransferAllAssets(FixedPart memory fixedPart, SignedVariablePart memory candidate) external;
 
     /**
      * @notice Liquidates all assets for the channel
@@ -27,11 +24,8 @@ interface INitroAdjudicator is IMultiAssetHolder, IForceMove {
      * @param outcome An array of SingleAssetExit[] items.
      * @param stateHash stored state hash for the channel
      */
-    function transferAllAssets(
-        bytes32 channelId,
-        Outcome.SingleAssetExit[] memory outcome,
-        bytes32 stateHash
-    ) external;
+    function transferAllAssets(bytes32 channelId, Outcome.SingleAssetExit[] memory outcome, bytes32 stateHash)
+        external;
 
     /**
      * @notice Checks whether an application-specific rules for a particular ForceMove-compliant state channel are enforced in supplied states.

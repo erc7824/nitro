@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
-import {NitroUtils} from './libraries/NitroUtils.sol';
-import {INitroTypes} from './interfaces/INitroTypes.sol';
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
+import {NitroUtils} from "./libraries/NitroUtils.sol";
+import {INitroTypes} from "./interfaces/INitroTypes.sol";
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
 
 /**
  * @dev The VirtualPaymentApp contract complies with the ForceMoveApp interface and allows payments to be made virtually from Alice to Bob (participants[0] to participants[n+1], where n is the number of intermediaries).
@@ -18,6 +18,7 @@ contract VirtualPaymentApp is IForceMoveApp {
     enum AllocationIndices {
         Alice, // payer
         Bob // beneficiary, initial allocation is zero
+
     }
 
     /**
@@ -41,13 +42,12 @@ contract VirtualPaymentApp is IForceMoveApp {
 
         if (proof.length == 0) {
             require(
-                NitroUtils.getClaimedSignersNum(candidate.signedBy) ==
-                    fixedPart.participants.length,
-                '!unanimous; |proof|=0'
+                NitroUtils.getClaimedSignersNum(candidate.signedBy) == fixedPart.participants.length,
+                "!unanimous; |proof|=0"
             );
-            if (candidate.variablePart.turnNum == 0) return (true, ''); // prefund
-            if (candidate.variablePart.turnNum == 1) return (true, ''); // postfund
-            revert('bad candidate turnNum; |proof|=0');
+            if (candidate.variablePart.turnNum == 0) return (true, ""); // prefund
+            if (candidate.variablePart.turnNum == 1) return (true, ""); // postfund
+            revert("bad candidate turnNum; |proof|=0");
         }
 
         // State 2 can be supported via a forced transition from state 1:
@@ -59,45 +59,31 @@ contract VirtualPaymentApp is IForceMoveApp {
 
         if (proof.length == 1) {
             requireProofOfUnanimousConsensusOnPostFund(proof[0], fixedPart.participants.length);
-            require(candidate.variablePart.turnNum == 2, 'bad candidate turnNum; |proof|=1');
+            require(candidate.variablePart.turnNum == 2, "bad candidate turnNum; |proof|=1");
             uint8 bobIndex = uint8(fixedPart.participants.length - 1);
-            require(
-                NitroUtils.isClaimedSignedBy(candidate.signedBy, bobIndex),
-                'redemption not signed by Bob'
-            );
+            require(NitroUtils.isClaimedSignedBy(candidate.signedBy, bobIndex), "redemption not signed by Bob");
             uint256 voucherAmount = requireValidVoucher(candidate.variablePart.appData, fixedPart);
-            requireCorrectAdjustments(
-                proof[0].variablePart.outcome,
-                candidate.variablePart.outcome,
-                voucherAmount
-            );
-            return (true, '');
+            requireCorrectAdjustments(proof[0].variablePart.outcome, candidate.variablePart.outcome, voucherAmount);
+            return (true, "");
         }
-        revert('bad proof length');
+        revert("bad proof length");
     }
 
-    function requireProofOfUnanimousConsensusOnPostFund(
-        RecoveredVariablePart memory rVP,
-        uint256 numParticipants
-    ) internal pure {
-        require(rVP.variablePart.turnNum == 1, 'bad proof[0].turnNum; |proof|=1');
-        require(
-            NitroUtils.getClaimedSignersNum(rVP.signedBy) == numParticipants,
-            'postfund !unanimous; |proof|=1'
-        );
+    function requireProofOfUnanimousConsensusOnPostFund(RecoveredVariablePart memory rVP, uint256 numParticipants)
+        internal
+        pure
+    {
+        require(rVP.variablePart.turnNum == 1, "bad proof[0].turnNum; |proof|=1");
+        require(NitroUtils.getClaimedSignersNum(rVP.signedBy) == numParticipants, "postfund !unanimous; |proof|=1");
     }
 
-    function requireValidVoucher(
-        bytes memory appData,
-        FixedPart memory fixedPart
-    ) internal pure returns (uint256) {
+    function requireValidVoucher(bytes memory appData, FixedPart memory fixedPart) internal pure returns (uint256) {
         VoucherAmountAndSignature memory voucher = abi.decode(appData, (VoucherAmountAndSignature));
 
         address signer = NitroUtils.recoverSigner(
-            keccak256(abi.encode(NitroUtils.getChannelId(fixedPart), voucher.amount)),
-            voucher.signature
+            keccak256(abi.encode(NitroUtils.getChannelId(fixedPart), voucher.amount)), voucher.signature
         );
-        require(signer == fixedPart.participants[0], 'invalid signature for voucher'); // could be incorrect channelId or incorrect signature
+        require(signer == fixedPart.participants[0], "invalid signature for voucher"); // could be incorrect channelId or incorrect signature
         return voucher.amount;
     }
 
@@ -107,21 +93,19 @@ contract VirtualPaymentApp is IForceMoveApp {
         uint256 voucherAmount
     ) internal pure {
         require(
-            oldOutcome.length == 1 &&
-                newOutcome.length == 1 &&
-                oldOutcome[0].asset == address(0) &&
-                newOutcome[0].asset == address(0),
-            'only native asset allowed'
+            oldOutcome.length == 1 && newOutcome.length == 1 && oldOutcome[0].asset == address(0)
+                && newOutcome[0].asset == address(0),
+            "only native asset allowed"
         );
 
         require(
-            newOutcome[0].allocations[uint256(AllocationIndices.Alice)].amount ==
-                oldOutcome[0].allocations[uint256(AllocationIndices.Alice)].amount - voucherAmount,
-            'Alice not adjusted correctly'
+            newOutcome[0].allocations[uint256(AllocationIndices.Alice)].amount
+                == oldOutcome[0].allocations[uint256(AllocationIndices.Alice)].amount - voucherAmount,
+            "Alice not adjusted correctly"
         );
         require(
             newOutcome[0].allocations[uint256(AllocationIndices.Bob)].amount == voucherAmount,
-            'Bob not adjusted correctly'
+            "Bob not adjusted correctly"
         );
     }
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
 
 /**
  * @dev The TrivialApp contracts complies with the ForceMoveApp interface and allows all transitions, regardless of the data. Used for testing purposes.
@@ -16,6 +16,6 @@ contract TrivialApp is IForceMoveApp {
         RecoveredVariablePart[] calldata, // proof, unused
         RecoveredVariablePart calldata // candidate, unused
     ) external pure override returns (bool, string memory) {
-        return (true, '');
+        return (true, "");
     }
 }

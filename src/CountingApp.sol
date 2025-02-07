@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
-import {StrictTurnTaking} from './libraries/signature-logic/StrictTurnTaking.sol';
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {StrictTurnTaking} from "./libraries/signature-logic/StrictTurnTaking.sol";
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
 
 /**
  * @dev The CountingApp contract complies with the ForceMoveApp interface and strict turn taking logic and allows only for a simple counter to be incremented. Used for testing purposes.
@@ -37,7 +37,7 @@ contract CountingApp is IForceMoveApp {
     ) external pure override returns (bool, string memory) {
         StrictTurnTaking.requireValidTurnTaking(fixedPart, proof, candidate);
 
-        require(proof.length != 0, '|proof| = 0');
+        require(proof.length != 0, "|proof| = 0");
 
         // validate the proof
         for (uint256 i = 1; i < proof.length; i++) {
@@ -48,7 +48,7 @@ contract CountingApp is IForceMoveApp {
         _requireIncrementedCounter(candidate, proof[proof.length - 1]);
         _requireEqualOutcomes(candidate, proof[proof.length - 1]);
 
-        return (true, '');
+        return (true, "");
     }
 
     /**
@@ -57,13 +57,10 @@ contract CountingApp is IForceMoveApp {
      * @param b RecoveredVariablePart with incremented counter.
      * @param a RecoveredVariablePart with counter before incrementing.
      */
-    function _requireIncrementedCounter(
-        RecoveredVariablePart memory b,
-        RecoveredVariablePart memory a
-    ) internal pure {
+    function _requireIncrementedCounter(RecoveredVariablePart memory b, RecoveredVariablePart memory a) internal pure {
         require(
             appData(b.variablePart.appData).counter == appData(a.variablePart.appData).counter + 1,
-            'Counter must be incremented'
+            "Counter must be incremented"
         );
     }
 
@@ -73,13 +70,7 @@ contract CountingApp is IForceMoveApp {
      * @param a First RecoveredVariablePart.
      * @param b Second RecoveredVariablePart.
      */
-    function _requireEqualOutcomes(
-        RecoveredVariablePart memory a,
-        RecoveredVariablePart memory b
-    ) internal pure {
-        require(
-            Outcome.exitsEqual(a.variablePart.outcome, b.variablePart.outcome),
-            'Outcome must not change'
-        );
+    function _requireEqualOutcomes(RecoveredVariablePart memory a, RecoveredVariablePart memory b) internal pure {
+        require(Outcome.exitsEqual(a.variablePart.outcome, b.variablePart.outcome), "Outcome must not change");
     }
 }

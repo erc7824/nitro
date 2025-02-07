@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {NitroUtils} from '../NitroUtils.sol';
-import {INitroTypes} from '../../interfaces/INitroTypes.sol';
+import {NitroUtils} from "../NitroUtils.sol";
+import {INitroTypes} from "../../interfaces/INitroTypes.sol";
 
 /**
  * @dev Library for consensus signatures logic, which implies that all participants have signed the candidate state, while supplying proof as empty.
@@ -20,10 +20,7 @@ library Consensus {
         INitroTypes.RecoveredVariablePart[] memory proof,
         INitroTypes.RecoveredVariablePart memory candidate
     ) internal pure {
-        require(proof.length == 0, '|proof|!=0');
-        require(
-            NitroUtils.getClaimedSignersNum(candidate.signedBy) == fixedPart.participants.length,
-            '!unanimous'
-        );
+        require(proof.length == 0, "|proof|!=0");
+        require(NitroUtils.getClaimedSignersNum(candidate.signedBy) == fixedPart.participants.length, "!unanimous");
     }
 }

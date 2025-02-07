@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {INitroTypes} from './INitroTypes.sol';
+import {INitroTypes} from "./INitroTypes.sol";
 
 /**
  * @dev The IForceMove interface defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.
@@ -53,10 +53,7 @@ interface IForceMove is INitroTypes {
      * @param candidate A candidate state (along with signatures) which is being claimed to be supported.
      */
     event ChallengeRegistered(
-        bytes32 indexed channelId,
-        uint48 finalizesAt,
-        SignedVariablePart[] proof,
-        SignedVariablePart candidate
+        bytes32 indexed channelId, uint48 finalizesAt, SignedVariablePart[] proof, SignedVariablePart candidate
     );
 
     /**

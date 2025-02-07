@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
-import {Consensus} from './libraries/signature-logic/Consensus.sol';
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
+import {Consensus} from "./libraries/signature-logic/Consensus.sol";
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
 
 // InterestBearingApp is a ForceMoveApp that allows a lender to earn interest
 // on a deposit. It functions as a ConsensusApp with the following additional rule:
@@ -37,6 +37,7 @@ contract InterestBearingApp is IForceMoveApp {
     enum AllocationIndicies {
         borrower, // intends to earn service fees up to a limit of the lender's deposit
         lender // makes initial deposit and earns interest
+
     }
 
     function stateIsSupported(
@@ -47,7 +48,7 @@ contract InterestBearingApp is IForceMoveApp {
         if (proof.length == 0) {
             // unanimous consensus check
             Consensus.requireConsensus(fixedPart, proof, candidate);
-            return (true, '');
+            return (true, "");
         } else if (proof.length == 1) {
             // check that proof[0] -> candidate respects the stated interest rate.
             // Requires:
@@ -58,32 +59,26 @@ contract InterestBearingApp is IForceMoveApp {
             RecoveredVariablePart[] memory nullProof;
             Consensus.requireConsensus(fixedPart, nullProof, proof[0]);
             require(
-                proof[0].variablePart.turnNum + 1 == candidate.variablePart.turnNum,
-                'turn(candidate) != turn(proof)+1'
+                proof[0].variablePart.turnNum + 1 == candidate.variablePart.turnNum, "turn(candidate) != turn(proof)+1"
             );
 
-            Funds memory outstandingInterest = computeOutstandingInterest(
-                abi.decode(proof[0].variablePart.appData, (InterestAppData))
-            );
+            Funds memory outstandingInterest =
+                computeOutstandingInterest(abi.decode(proof[0].variablePart.appData, (InterestAppData)));
             requireFairOutcomeAdjustment(
-                proof[0].variablePart.outcome,
-                candidate.variablePart.outcome,
-                outstandingInterest
+                proof[0].variablePart.outcome, candidate.variablePart.outcome, outstandingInterest
             );
         } else {
-            return (false, '|proof| > 1');
+            return (false, "|proof| > 1");
         }
 
-        return (true, '');
+        return (true, "");
     }
 
     // The outstanding interest is calculated based on:
     //  - the latest consensus principal
     //  - the channel's interest rate
     //  - the time elapsed since the last principal adjustment
-    function computeOutstandingInterest(
-        InterestAppData memory appData
-    ) private view returns (Funds memory) {
+    function computeOutstandingInterest(InterestAppData memory appData) private view returns (Funds memory) {
         uint256 numBlocks = block.number - appData.blocknumber;
 
         address[] memory assets = new address[](appData.principal.asset.length);
@@ -94,9 +89,7 @@ contract InterestBearingApp is IForceMoveApp {
         // copy all assets from the principal, and multiply by the interest rate
         for (uint256 i = 0; i < appData.principal.asset.length; i++) {
             outstanding.asset[i] = appData.principal.asset[i];
-            outstanding.amount[i] =
-                (appData.principal.amount[i] * numBlocks) /
-                appData.interestPerBlockDivisor;
+            outstanding.amount[i] = (appData.principal.amount[i] * numBlocks) / appData.interestPerBlockDivisor;
         }
 
         return outstanding;
@@ -114,7 +107,7 @@ contract InterestBearingApp is IForceMoveApp {
 
             for (uint256 j = 0; j < finalOutcome.length; j++) {
                 if (finalOutcome[j].asset == asset) {
-                    require(initialOutcome[j].asset == asset, 'Asset mismatch');
+                    require(initialOutcome[j].asset == asset, "Asset mismatch");
 
                     requireFairAssetAdjustment(initialOutcome[j], finalOutcome[j], earned);
                 }
@@ -129,18 +122,14 @@ contract InterestBearingApp is IForceMoveApp {
         uint256 earned
     ) private pure {
         require(
-            initial.allocations[uint256(AllocationIndicies.borrower)].destination ==
-                adjusted.allocations[uint256(AllocationIndicies.borrower)].destination,
-            'payee mismatch'
+            initial.allocations[uint256(AllocationIndicies.borrower)].destination
+                == adjusted.allocations[uint256(AllocationIndicies.borrower)].destination,
+            "payee mismatch"
         );
-        uint256 initialProviderBalance = initial
-            .allocations[uint256(AllocationIndicies.borrower)]
-            .amount;
-        uint256 adjustedProviderBalance = adjusted
-            .allocations[uint256(AllocationIndicies.borrower)]
-            .amount;
+        uint256 initialProviderBalance = initial.allocations[uint256(AllocationIndicies.borrower)].amount;
+        uint256 adjustedProviderBalance = adjusted.allocations[uint256(AllocationIndicies.borrower)].amount;
         uint256 claimed = initialProviderBalance - adjustedProviderBalance;
 
-        require(claimed <= earned, 'earned<claimed');
+        require(claimed <= earned, "earned<claimed");
     }
 }

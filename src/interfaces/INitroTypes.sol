@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
 
 interface INitroTypes {
     struct Signature {

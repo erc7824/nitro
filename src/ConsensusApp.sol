@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
-import {Consensus} from './libraries/signature-logic/Consensus.sol';
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
+import {Consensus} from "./libraries/signature-logic/Consensus.sol";
 
 /**
  * @dev The ConsensusApp contracts complies with the ForceMoveApp interface and uses consensus signatures logic.
@@ -21,6 +21,6 @@ contract ConsensusApp is IForceMoveApp {
         RecoveredVariablePart calldata candidate
     ) external pure override returns (bool, string memory) {
         Consensus.requireConsensus(fixedPart, proof, candidate);
-        return (true, '');
+        return (true, "");
     }
 }

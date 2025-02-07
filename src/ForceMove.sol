@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {NitroUtils} from './libraries/NitroUtils.sol';
-import {IForceMove} from './interfaces/IForceMove.sol';
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
-import {StatusManager} from './StatusManager.sol';
+import {NitroUtils} from "./libraries/NitroUtils.sol";
+import {IForceMove} from "./interfaces/IForceMove.sol";
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
+import {StatusManager} from "./StatusManager.sol";
 
 /**
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
@@ -22,9 +22,11 @@ contract ForceMove is IForceMove, StatusManager {
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
      * @return fingerprint The last 160 bits of keccak256(stateHash, outcomeHash)
      */
-    function unpackStatus(
-        bytes32 channelId
-    ) external view returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint) {
+    function unpackStatus(bytes32 channelId)
+        external
+        view
+        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
+    {
         (turnNumRecord, finalizesAt, fingerprint) = _unpackStatus(channelId);
     }
 
@@ -106,9 +108,7 @@ contract ForceMove is IForceMove, StatusManager {
         ChannelMode currMode = _mode(channelId);
 
         // effects
-        statusOf[channelId] = _generateStatus(
-            ChannelData(candidateTurnNum, 0, bytes32(0), bytes32(0))
-        );
+        statusOf[channelId] = _generateStatus(ChannelData(candidateTurnNum, 0, bytes32(0), bytes32(0)));
 
         if (currMode == ChannelMode.Open) {
             emit Checkpointed(channelId, candidateTurnNum);
@@ -124,10 +124,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param candidate A struct, that can be signed by any number of participants, describing the properties of the state channel to change to.
      */
-    function conclude(
-        FixedPart memory fixedPart,
-        SignedVariablePart memory candidate
-    ) external virtual override {
+    function conclude(FixedPart memory fixedPart, SignedVariablePart memory candidate) external virtual override {
         _conclude(fixedPart, candidate);
     }
 
@@ -137,23 +134,19 @@ contract ForceMove is IForceMove, StatusManager {
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param candidate A struct, that can be signed by any number of participants, describing the properties of the state channel to change to.
      */
-    function _conclude(
-        FixedPart memory fixedPart,
-        SignedVariablePart memory candidate
-    ) internal returns (bytes32 channelId) {
+    function _conclude(FixedPart memory fixedPart, SignedVariablePart memory candidate)
+        internal
+        returns (bytes32 channelId)
+    {
         channelId = NitroUtils.getChannelId(fixedPart);
 
         // checks
         _requireChannelNotFinalized(channelId);
-        require(candidate.variablePart.isFinal, 'State must be final');
-        RecoveredVariablePart memory recoveredVariablePart = recoverVariablePart(
-            fixedPart,
-            candidate
-        );
+        require(candidate.variablePart.isFinal, "State must be final");
+        RecoveredVariablePart memory recoveredVariablePart = recoverVariablePart(fixedPart, candidate);
         require(
-            NitroUtils.getClaimedSignersNum(recoveredVariablePart.signedBy) ==
-                fixedPart.participants.length,
-            '!unanimous'
+            NitroUtils.getClaimedSignersNum(recoveredVariablePart.signedBy) == fixedPart.participants.length,
+            "!unanimous"
         );
 
         // effects
@@ -185,11 +178,9 @@ contract ForceMove is IForceMove, StatusManager {
         address[] memory participants,
         Signature memory challengerSignature
     ) internal pure {
-        address challenger = NitroUtils.recoverSigner(
-            keccak256(abi.encode(supportedStateHash, 'forceMove')),
-            challengerSignature
-        );
-        require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');
+        address challenger =
+            NitroUtils.recoverSigner(keccak256(abi.encode(supportedStateHash, "forceMove")), challengerSignature);
+        require(_isAddressInArray(challenger, participants), "Challenger is not a participant");
     }
 
     /**
@@ -199,10 +190,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param addresses A line-up of possible perpetrators.
      * @return true if the address is in the array, false otherwise
      */
-    function _isAddressInArray(
-        address suspect,
-        address[] memory addresses
-    ) internal pure returns (bool) {
+    function _isAddressInArray(address suspect, address[] memory addresses) internal pure returns (bool) {
         for (uint256 i = 0; i < addresses.length; i++) {
             if (suspect == addresses[i]) {
                 return true;
@@ -223,12 +211,9 @@ contract ForceMove is IForceMove, StatusManager {
         SignedVariablePart[] memory proof,
         SignedVariablePart memory candidate
     ) internal view returns (bool isSupported, string memory reason) {
-        return
-            IForceMoveApp(fixedPart.appDefinition).stateIsSupported(
-                fixedPart,
-                recoverVariableParts(fixedPart, proof),
-                recoverVariablePart(fixedPart, candidate)
-            );
+        return IForceMoveApp(fixedPart.appDefinition).stateIsSupported(
+            fixedPart, recoverVariableParts(fixedPart, proof), recoverVariablePart(fixedPart, candidate)
+        );
     }
 
     /**
@@ -238,13 +223,12 @@ contract ForceMove is IForceMove, StatusManager {
      * @param signedVariableParts Signed variable parts of the states in the support proof.
      * @return An array of recoveredVariableParts, identical to the supplied signedVariableParts array, but with the signatures replaced with a signedBy bitmask.
      */
-    function recoverVariableParts(
-        FixedPart memory fixedPart,
-        SignedVariablePart[] memory signedVariableParts
-    ) internal pure returns (RecoveredVariablePart[] memory) {
-        RecoveredVariablePart[] memory recoveredVariableParts = new RecoveredVariablePart[](
-            signedVariableParts.length
-        );
+    function recoverVariableParts(FixedPart memory fixedPart, SignedVariablePart[] memory signedVariableParts)
+        internal
+        pure
+        returns (RecoveredVariablePart[] memory)
+    {
+        RecoveredVariablePart[] memory recoveredVariableParts = new RecoveredVariablePart[](signedVariableParts.length);
         for (uint256 i = 0; i < signedVariableParts.length; i++) {
             recoveredVariableParts[i] = recoverVariablePart(fixedPart, signedVariableParts[i]);
         }
@@ -258,19 +242,17 @@ contract ForceMove is IForceMove, StatusManager {
      * @param signedVariablePart A signed variable part.
      * @return RecoveredVariablePart, identical to the supplied signedVariablePart, but with the signatures replaced with a signedBy bitmask.
      */
-    function recoverVariablePart(
-        FixedPart memory fixedPart,
-        SignedVariablePart memory signedVariablePart
-    ) internal pure returns (RecoveredVariablePart memory) {
-        RecoveredVariablePart memory rvp = RecoveredVariablePart({
-            variablePart: signedVariablePart.variablePart,
-            signedBy: 0
-        });
+    function recoverVariablePart(FixedPart memory fixedPart, SignedVariablePart memory signedVariablePart)
+        internal
+        pure
+        returns (RecoveredVariablePart memory)
+    {
+        RecoveredVariablePart memory rvp =
+            RecoveredVariablePart({variablePart: signedVariablePart.variablePart, signedBy: 0});
         //  For each signature
         for (uint256 j = 0; j < signedVariablePart.sigs.length; j++) {
             address signer = NitroUtils.recoverSigner(
-                NitroUtils.hashState(fixedPart, signedVariablePart.variablePart),
-                signedVariablePart.sigs[j]
+                NitroUtils.hashState(fixedPart, signedVariablePart.variablePart), signedVariablePart.sigs[j]
             );
             // Check each participant to see if they signed it
             for (uint256 i = 0; i < fixedPart.participants.length; i++) {
@@ -290,8 +272,8 @@ contract ForceMove is IForceMove, StatusManager {
      * @param newTurnNumRecord New turnNumRecord intended to overwrite existing value
      */
     function _requireIncreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord) internal view {
-        (uint48 turnNumRecord, , ) = _unpackStatus(channelId);
-        require(newTurnNumRecord > turnNumRecord, 'turnNumRecord not increased.');
+        (uint48 turnNumRecord,,) = _unpackStatus(channelId);
+        require(newTurnNumRecord > turnNumRecord, "turnNumRecord not increased.");
     }
 
     /**
@@ -300,12 +282,9 @@ contract ForceMove is IForceMove, StatusManager {
      * @param channelId Unique identifier for a channel.
      * @param newTurnNumRecord New turnNumRecord intended to overwrite existing value
      */
-    function _requireNonDecreasedTurnNumber(
-        bytes32 channelId,
-        uint48 newTurnNumRecord
-    ) internal view {
-        (uint48 turnNumRecord, , ) = _unpackStatus(channelId);
-        require(newTurnNumRecord >= turnNumRecord, 'turnNumRecord decreased.');
+    function _requireNonDecreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord) internal view {
+        (uint48 turnNumRecord,,) = _unpackStatus(channelId);
+        require(newTurnNumRecord >= turnNumRecord, "turnNumRecord decreased.");
     }
 
     /**
@@ -314,7 +293,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param channelId Unique identifier for a channel.
      */
     function _requireChannelNotFinalized(bytes32 channelId) internal view {
-        require(_mode(channelId) != ChannelMode.Finalized, 'Channel finalized.');
+        require(_mode(channelId) != ChannelMode.Finalized, "Channel finalized.");
     }
 
     /**
@@ -323,7 +302,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param channelId Unique identifier for a channel.
      */
     function _requireChannelOpen(bytes32 channelId) internal view {
-        require(_mode(channelId) == ChannelMode.Open, 'Channel not open.');
+        require(_mode(channelId) == ChannelMode.Open, "Channel not open.");
     }
 
     /**

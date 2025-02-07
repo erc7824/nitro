@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {IStatusManager} from './interfaces/IStatusManager.sol';
+import {IStatusManager} from "./interfaces/IStatusManager.sol";
 
 /**
  * @dev The StatusManager is responsible for on-chain storage of the status of active channels
@@ -18,7 +18,7 @@ contract StatusManager is IStatusManager {
         // Note that _unpackStatus(someRandomChannelId) returns (0,0,0), which is
         // correct when nobody has written to storage yet.
 
-        (, uint48 finalizesAt, ) = _unpackStatus(channelId);
+        (, uint48 finalizesAt,) = _unpackStatus(channelId);
         if (finalizesAt == 0) {
             return ChannelMode.Open;
             // solhint-disable-next-line not-rely-on-time
@@ -34,9 +34,7 @@ contract StatusManager is IStatusManager {
      * @dev Formats the input data for on chain storage.
      * @param channelData ChannelData data.
      */
-    function _generateStatus(
-        ChannelData memory channelData
-    ) internal pure returns (bytes32 status) {
+    function _generateStatus(ChannelData memory channelData) internal pure returns (bytes32 status) {
         // The hash is constructed from left to right.
         uint256 result;
         uint16 cursor = 256;
@@ -54,10 +52,7 @@ contract StatusManager is IStatusManager {
         status = bytes32(result);
     }
 
-    function _generateFingerprint(
-        bytes32 stateHash,
-        bytes32 outcomeHash
-    ) internal pure returns (uint160) {
+    function _generateFingerprint(bytes32 stateHash, bytes32 outcomeHash) internal pure returns (uint160) {
         return uint160(uint256(keccak256(abi.encode(stateHash, outcomeHash))));
     }
 
@@ -69,9 +64,11 @@ contract StatusManager is IStatusManager {
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
      * @return fingerprint The last 160 bits of kecca256(stateHash, outcomeHash)
      */
-    function _unpackStatus(
-        bytes32 channelId
-    ) internal view returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint) {
+    function _unpackStatus(bytes32 channelId)
+        internal
+        view
+        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
+    {
         bytes32 status = statusOf[channelId];
         uint16 cursor = 256;
         turnNumRecord = uint48(uint256(status) >> (cursor -= 48));

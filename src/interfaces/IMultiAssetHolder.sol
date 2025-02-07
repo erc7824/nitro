@@ -13,12 +13,7 @@ interface IMultiAssetHolder {
      * @param expectedHeld The number of wei the depositor believes are _already_ escrowed against the channelId.
      * @param amount The intended number of wei to be deposited.
      */
-    function deposit(
-        address asset,
-        bytes32 destination,
-        uint256 expectedHeld,
-        uint256 amount
-    ) external payable;
+    function deposit(address asset, bytes32 destination, uint256 expectedHeld, uint256 amount) external payable;
 
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
@@ -84,10 +79,7 @@ interface IMultiAssetHolder {
      * @param finalHoldings holdings[asset][channelId] **after** the allocations are updated
      */
     event AllocationUpdated(
-        bytes32 indexed channelId,
-        uint256 assetIndex,
-        uint256 initialHoldings,
-        uint256 finalHoldings
+        bytes32 indexed channelId, uint256 assetIndex, uint256 initialHoldings, uint256 finalHoldings
     );
 
     /**

@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import {Create2} from '@openzeppelin/contracts/utils/Create2.sol';
+import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
 contract Create2Deployer {
     function deploy(uint256 value, bytes32 salt, bytes memory code) public {
@@ -14,11 +14,11 @@ contract Create2Deployer {
         return Create2.computeAddress(salt, codeHash);
     }
 
-    function computeAddressWithDeployer(
-        bytes32 salt,
-        bytes32 codeHash,
-        address deployer
-    ) public pure returns (address) {
+    function computeAddressWithDeployer(bytes32 salt, bytes32 codeHash, address deployer)
+        public
+        pure
+        returns (address)
+    {
         return Create2.computeAddress(salt, codeHash, deployer);
     }
 }

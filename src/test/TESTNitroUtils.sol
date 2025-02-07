@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {INitroTypes} from '../interfaces/INitroTypes.sol';
-import {NitroUtils} from '../libraries/NitroUtils.sol';
+import {INitroTypes} from "../interfaces/INitroTypes.sol";
+import {NitroUtils} from "../libraries/NitroUtils.sol";
 
 /**
  * @dev This contract uses the NitroUtils library to enable it to be more easily unit-tested. It exposes public or external functions which call into internal functions. It should not be deployed in a production environment.
@@ -14,10 +14,7 @@ contract TESTNitroUtils {
      * @param sig ethereum digital signature
      * @return signer
      */
-    function recoverSigner(
-        bytes32 _d,
-        INitroTypes.Signature memory sig
-    ) public pure returns (address) {
+    function recoverSigner(bytes32 _d, INitroTypes.Signature memory sig) public pure returns (address) {
         return NitroUtils.recoverSigner(_d, sig);
     }
 
@@ -27,10 +24,7 @@ contract TESTNitroUtils {
      * @param signedBy Bit mask field to check.
      * @param participantIndex Bit to check.
      */
-    function isClaimedSignedBy(
-        uint256 signedBy,
-        uint8 participantIndex
-    ) public pure returns (bool) {
+    function isClaimedSignedBy(uint256 signedBy, uint8 participantIndex) public pure returns (bool) {
         return NitroUtils.isClaimedSignedBy(signedBy, participantIndex);
     }
 
@@ -40,10 +34,7 @@ contract TESTNitroUtils {
      * @param signedBy Bit mask field to check.
      * @param participantIndex Bit to check.
      */
-    function isClaimedSignedOnlyBy(
-        uint256 signedBy,
-        uint8 participantIndex
-    ) public pure returns (bool) {
+    function isClaimedSignedOnlyBy(uint256 signedBy, uint8 participantIndex) public pure returns (bool) {
         return NitroUtils.isClaimedSignedOnlyBy(signedBy, participantIndex);
     }
 

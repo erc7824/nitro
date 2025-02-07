@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {NitroUtils} from '../NitroUtils.sol';
-import {INitroTypes} from '../../interfaces/INitroTypes.sol';
+import {NitroUtils} from "../NitroUtils.sol";
+import {INitroTypes} from "../../interfaces/INitroTypes.sol";
 
 library StrictTurnTaking {
     /**
@@ -48,7 +48,7 @@ library StrictTurnTaking {
                 recoveredVariablePart.signedBy,
                 uint8(recoveredVariablePart.variablePart.turnNum % fixedPart.participants.length)
             ),
-            'Invalid signedBy'
+            "Invalid signedBy"
         );
     }
 
@@ -58,11 +58,8 @@ library StrictTurnTaking {
      * @param variablePart Variable part to check turn number of.
      * @param turnNum Turn number to compare with.
      */
-    function requireHasTurnNum(
-        INitroTypes.VariablePart memory variablePart,
-        uint48 turnNum
-    ) internal pure {
-        require(variablePart.turnNum == turnNum, 'Wrong variablePart.turnNum');
+    function requireHasTurnNum(INitroTypes.VariablePart memory variablePart, uint48 turnNum) internal pure {
+        require(variablePart.turnNum == turnNum, "Wrong variablePart.turnNum");
     }
 
     /**
@@ -72,10 +69,7 @@ library StrictTurnTaking {
      * @param turnNum State turn number.
      * @return address Moving partitipant address.
      */
-    function _moverAddress(
-        address[] memory participants,
-        uint48 turnNum
-    ) internal pure returns (address) {
+    function _moverAddress(address[] memory participants, uint48 turnNum) internal pure returns (address) {
         return participants[turnNum % participants.length];
     }
 
@@ -86,12 +80,9 @@ library StrictTurnTaking {
      * @param numProofStates Number of proof states submitted.
      */
     function _requireValidInput(uint256 numParticipants, uint256 numProofStates) internal pure {
-        require(
-            (numProofStates > 0) && (numParticipants == numProofStates + 1),
-            'Invalid number of proof states'
-        );
+        require((numProofStates > 0) && (numParticipants == numProofStates + 1), "Invalid number of proof states");
 
         // no more than 255 participants
-        require(numParticipants <= type(uint8).max, 'Too many participants'); // type(uint8).max = 2**8 - 1 = 255
+        require(numParticipants <= type(uint8).max, "Too many participants"); // type(uint8).max = 2**8 - 1 = 255
     }
 }

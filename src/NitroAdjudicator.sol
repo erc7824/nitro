@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
-import {NitroUtils} from './libraries/NitroUtils.sol';
-import {INitroAdjudicator} from './interfaces/INitroAdjudicator.sol';
-import {ForceMove} from './ForceMove.sol';
-import {IForceMoveApp} from './interfaces/IForceMoveApp.sol';
-import {MultiAssetHolder} from './MultiAssetHolder.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {NitroUtils} from "./libraries/NitroUtils.sol";
+import {INitroAdjudicator} from "./interfaces/INitroAdjudicator.sol";
+import {ForceMove} from "./ForceMove.sol";
+import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
+import {MultiAssetHolder} from "./MultiAssetHolder.sol";
 
 /**
  * @dev The NitroAdjudicator contract extends MultiAssetHolder and ForceMove
@@ -18,10 +18,10 @@ contract NitroAdjudicator is INitroAdjudicator, ForceMove, MultiAssetHolder {
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param candidate Variable part of the state to change to.
      */
-    function concludeAndTransferAllAssets(
-        FixedPart memory fixedPart,
-        SignedVariablePart memory candidate
-    ) public virtual {
+    function concludeAndTransferAllAssets(FixedPart memory fixedPart, SignedVariablePart memory candidate)
+        public
+        virtual
+    {
         bytes32 channelId = _conclude(fixedPart, candidate);
 
         transferAllAssets(channelId, candidate.variablePart.outcome, bytes32(0));
@@ -34,11 +34,10 @@ contract NitroAdjudicator is INitroAdjudicator, ForceMove, MultiAssetHolder {
      * @param outcome An array of SingleAssetExit[] items.
      * @param stateHash stored state hash for the channel
      */
-    function transferAllAssets(
-        bytes32 channelId,
-        Outcome.SingleAssetExit[] memory outcome,
-        bytes32 stateHash
-    ) public virtual {
+    function transferAllAssets(bytes32 channelId, Outcome.SingleAssetExit[] memory outcome, bytes32 stateHash)
+        public
+        virtual
+    {
         // checks
         _requireChannelFinalized(channelId);
         _requireMatchingFingerprint(stateHash, NitroUtils.hashOutcome(outcome), channelId);
@@ -58,31 +57,18 @@ contract NitroAdjudicator is INitroAdjudicator, ForceMove, MultiAssetHolder {
                 bool allocatesOnlyZeros,
                 Outcome.Allocation[] memory exitAllocations,
                 uint256 totalPayoutsForAsset
-            ) = compute_transfer_effects_and_interactions(
-                    initialHoldings[assetIndex],
-                    allocations,
-                    new uint256[](0)
-                );
+            ) = compute_transfer_effects_and_interactions(initialHoldings[assetIndex], allocations, new uint256[](0));
             if (!allocatesOnlyZeros) allocatesOnlyZerosForAllAssets = false;
             totalPayouts[assetIndex] = totalPayoutsForAsset;
             outcome[assetIndex].allocations = newAllocations;
-            exit[assetIndex] = Outcome.SingleAssetExit(
-                asset,
-                assetOutcome.assetMetadata,
-                exitAllocations
-            );
+            exit[assetIndex] = Outcome.SingleAssetExit(asset, assetOutcome.assetMetadata, exitAllocations);
         }
 
         // effects
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
             address asset = outcome[assetIndex].asset;
             holdings[asset][channelId] -= totalPayouts[assetIndex];
-            emit AllocationUpdated(
-                channelId,
-                assetIndex,
-                initialHoldings[assetIndex],
-                holdings[asset][channelId]
-            );
+            emit AllocationUpdated(channelId, assetIndex, initialHoldings[assetIndex], holdings[asset][channelId]);
         }
 
         if (allocatesOnlyZerosForAllAssets) {
@@ -107,12 +93,9 @@ contract NitroAdjudicator is INitroAdjudicator, ForceMove, MultiAssetHolder {
         SignedVariablePart[] calldata proof,
         SignedVariablePart calldata candidate
     ) external view returns (bool, string memory) {
-        return
-            IForceMoveApp(fixedPart.appDefinition).stateIsSupported(
-                fixedPart,
-                recoverVariableParts(fixedPart, proof),
-                recoverVariablePart(fixedPart, candidate)
-            );
+        return IForceMoveApp(fixedPart.appDefinition).stateIsSupported(
+            fixedPart, recoverVariableParts(fixedPart, proof), recoverVariablePart(fixedPart, candidate)
+        );
     }
 
     /**

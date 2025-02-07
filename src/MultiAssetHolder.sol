@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {IMultiAssetHolder} from './interfaces/IMultiAssetHolder.sol';
-import {StatusManager} from './StatusManager.sol';
+import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IMultiAssetHolder} from "./interfaces/IMultiAssetHolder.sol";
+import {StatusManager} from "./StatusManager.sol";
 
 /**
-@dev An implementation of the IMultiAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channels and/or external destinations, as well as for guarantees to be reclaimed.
+ * @dev An implementation of the IMultiAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channels and/or external destinations, as well as for guarantees to be reclaimed.
  */
 contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     using SafeERC20 for IERC20;
@@ -34,24 +34,24 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      * @param expectedHeld The number of wei/tokens the depositor believes are _already_ escrowed against the channelId.
      * @param amount The intended number of wei/tokens to be deposited.
      */
-    function deposit(
-        address asset,
-        bytes32 channelId,
-        uint256 expectedHeld,
-        uint256 amount
-    ) external payable virtual override {
-        require(!_isExternalDestination(channelId), 'Deposit to external destination');
+    function deposit(address asset, bytes32 channelId, uint256 expectedHeld, uint256 amount)
+        external
+        payable
+        virtual
+        override
+    {
+        require(!_isExternalDestination(channelId), "Deposit to external destination");
         // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
         // 1. Participant A deposits
         // 2. Participant B sees A's deposit, which means it is now safe for them to deposit
         // 3. Participant B submits their deposit
         // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
         uint256 held = holdings[asset][channelId];
-        require(held == expectedHeld, 'held != expectedHeld');
+        require(held == expectedHeld, "held != expectedHeld");
 
         // require successful deposit before updating holdings (protect against reentrancy)
         if (asset == address(0)) {
-            require(msg.value == amount, 'Incorrect msg.value for deposit');
+            require(msg.value == amount, "Incorrect msg.value for deposit");
         } else {
             IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
         }
@@ -78,32 +78,14 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         bytes32 stateHash,
         uint256[] memory indices
     ) external override {
-        (
-            Outcome.SingleAssetExit[] memory outcome,
-            address asset,
-            uint256 initialAssetHoldings
-        ) = _apply_transfer_checks(assetIndex, indices, fromChannelId, stateHash, outcomeBytes); // view
+        (Outcome.SingleAssetExit[] memory outcome, address asset, uint256 initialAssetHoldings) =
+            _apply_transfer_checks(assetIndex, indices, fromChannelId, stateHash, outcomeBytes); // view
 
-        (
-            Outcome.Allocation[] memory newAllocations,
-            ,
-            Outcome.Allocation[] memory exitAllocations,
-            uint256 totalPayouts
-        ) = compute_transfer_effects_and_interactions(
-                initialAssetHoldings,
-                outcome[assetIndex].allocations,
-                indices
-            ); // pure, also performs checks
+        (Outcome.Allocation[] memory newAllocations,, Outcome.Allocation[] memory exitAllocations, uint256 totalPayouts)
+        = compute_transfer_effects_and_interactions(initialAssetHoldings, outcome[assetIndex].allocations, indices); // pure, also performs checks
 
         _apply_transfer_effects(
-            assetIndex,
-            asset,
-            fromChannelId,
-            stateHash,
-            outcome,
-            newAllocations,
-            initialAssetHoldings,
-            totalPayouts
+            assetIndex, asset, fromChannelId, stateHash, outcome, newAllocations, initialAssetHoldings, totalPayouts
         );
         _apply_transfer_interactions(outcome[assetIndex], exitAllocations);
     }
@@ -114,15 +96,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         bytes32 channelId,
         bytes32 stateHash,
         bytes memory outcomeBytes
-    )
-        internal
-        view
-        returns (
-            Outcome.SingleAssetExit[] memory outcome,
-            address asset,
-            uint256 initialAssetHoldings
-        )
-    {
+    ) internal view returns (Outcome.SingleAssetExit[] memory outcome, address asset, uint256 initialAssetHoldings) {
         _requireIncreasingIndices(indices); // This assumption is relied on by compute_transfer_effects_and_interactions
         _requireChannelFinalized(channelId);
         _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), channelId);
@@ -148,9 +122,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     {
         // `indices == []` means "pay out to all"
         // Note: by initializing exitAllocations to be an array of fixed length, its entries are initialized to be `0`
-        exitAllocations = new Outcome.Allocation[](
-            indices.length > 0 ? indices.length : allocations.length
-        );
+        exitAllocations = new Outcome.Allocation[](indices.length > 0 ? indices.length : allocations.length);
         totalPayouts = 0;
         newAllocations = new Outcome.Allocation[](allocations.length);
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
@@ -166,8 +138,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             // compute new amount part
             uint256 affordsForDestination = min(allocations[i].amount, surplus);
             if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                if (allocations[k].allocationType == uint8(Outcome.AllocationType.guarantee))
-                    revert('cannot transfer a guarantee');
+                if (allocations[k].allocationType == uint8(Outcome.AllocationType.guarantee)) {
+                    revert("cannot transfer a guarantee");
+                }
                 // found a match
                 // reduce the current allocationItem.amount
                 newAllocations[i].amount = allocations[i].amount - affordsForDestination;
@@ -217,11 +190,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     ) internal {
         // create a new tuple to avoid mutating singleAssetExit
         _executeSingleAssetExit(
-            Outcome.SingleAssetExit(
-                singleAssetExit.asset,
-                singleAssetExit.assetMetadata,
-                exitAllocations
-            )
+            Outcome.SingleAssetExit(singleAssetExit.asset, singleAssetExit.assetMetadata, exitAllocations)
         );
     }
 
@@ -231,24 +200,15 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      * @param reclaimArgs arguments used in the reclaim function. Used to avoid stack too deep error.
      */
     function reclaim(ReclaimArgs memory reclaimArgs) external override {
-        (
-            Outcome.SingleAssetExit[] memory sourceOutcome,
-            Outcome.SingleAssetExit[] memory targetOutcome
-        ) = _apply_reclaim_checks(reclaimArgs); // view
+        (Outcome.SingleAssetExit[] memory sourceOutcome, Outcome.SingleAssetExit[] memory targetOutcome) =
+            _apply_reclaim_checks(reclaimArgs); // view
 
         Outcome.Allocation[] memory newSourceAllocations;
         {
-            Outcome.Allocation[] memory sourceAllocations = sourceOutcome[
-                reclaimArgs.sourceAssetIndex
-            ].allocations;
-            Outcome.Allocation[] memory targetAllocations = targetOutcome[
-                reclaimArgs.targetAssetIndex
-            ].allocations;
-            newSourceAllocations = compute_reclaim_effects(
-                sourceAllocations,
-                targetAllocations,
-                reclaimArgs.indexOfTargetInSource
-            ); // pure
+            Outcome.Allocation[] memory sourceAllocations = sourceOutcome[reclaimArgs.sourceAssetIndex].allocations;
+            Outcome.Allocation[] memory targetAllocations = targetOutcome[reclaimArgs.targetAssetIndex].allocations;
+            newSourceAllocations =
+                compute_reclaim_effects(sourceAllocations, targetAllocations, reclaimArgs.indexOfTargetInSource); // pure
         }
 
         _apply_reclaim_effects(reclaimArgs, sourceOutcome, newSourceAllocations);
@@ -257,15 +217,10 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     /**
      * @dev Checks that the source and target channels are finalized; that the supplied outcomes match the stored fingerprints; that the asset is identical in source and target. Computes and returns the decoded outcomes.
      */
-    function _apply_reclaim_checks(
-        ReclaimArgs memory reclaimArgs
-    )
+    function _apply_reclaim_checks(ReclaimArgs memory reclaimArgs)
         internal
         view
-        returns (
-            Outcome.SingleAssetExit[] memory sourceOutcome,
-            Outcome.SingleAssetExit[] memory targetOutcome
-        )
+        returns (Outcome.SingleAssetExit[] memory sourceOutcome, Outcome.SingleAssetExit[] memory targetOutcome)
     {
         (
             bytes32 sourceChannelId,
@@ -274,43 +229,33 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             bytes memory targetOutcomeBytes,
             uint256 targetAssetIndex
         ) = (
-                reclaimArgs.sourceChannelId,
-                reclaimArgs.sourceOutcomeBytes,
-                reclaimArgs.sourceAssetIndex,
-                reclaimArgs.targetOutcomeBytes,
-                reclaimArgs.targetAssetIndex
-            );
+            reclaimArgs.sourceChannelId,
+            reclaimArgs.sourceOutcomeBytes,
+            reclaimArgs.sourceAssetIndex,
+            reclaimArgs.targetOutcomeBytes,
+            reclaimArgs.targetAssetIndex
+        );
 
         // source checks
         _requireChannelFinalized(sourceChannelId);
-        _requireMatchingFingerprint(
-            reclaimArgs.sourceStateHash,
-            keccak256(sourceOutcomeBytes),
-            sourceChannelId
-        );
+        _requireMatchingFingerprint(reclaimArgs.sourceStateHash, keccak256(sourceOutcomeBytes), sourceChannelId);
 
         sourceOutcome = Outcome.decodeExit(sourceOutcomeBytes);
         targetOutcome = Outcome.decodeExit(targetOutcomeBytes);
         address asset = sourceOutcome[sourceAssetIndex].asset;
         require(
-            sourceOutcome[sourceAssetIndex]
-                .allocations[reclaimArgs.indexOfTargetInSource]
-                .allocationType == uint8(Outcome.AllocationType.guarantee),
-            'not a guarantee allocation'
+            sourceOutcome[sourceAssetIndex].allocations[reclaimArgs.indexOfTargetInSource].allocationType
+                == uint8(Outcome.AllocationType.guarantee),
+            "not a guarantee allocation"
         );
 
-        bytes32 targetChannelId = sourceOutcome[sourceAssetIndex]
-            .allocations[reclaimArgs.indexOfTargetInSource]
-            .destination;
+        bytes32 targetChannelId =
+            sourceOutcome[sourceAssetIndex].allocations[reclaimArgs.indexOfTargetInSource].destination;
 
         // target checks
-        require(targetOutcome[targetAssetIndex].asset == asset, 'targetAsset != guaranteeAsset');
+        require(targetOutcome[targetAssetIndex].asset == asset, "targetAsset != guaranteeAsset");
         _requireChannelFinalized(targetChannelId);
-        _requireMatchingFingerprint(
-            reclaimArgs.targetStateHash,
-            keccak256(targetOutcomeBytes),
-            targetChannelId
-        );
+        _requireMatchingFingerprint(reclaimArgs.targetStateHash, keccak256(targetOutcomeBytes), targetChannelId);
     }
 
     /**
@@ -359,10 +304,10 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             k++;
         }
 
-        require(foundTarget, 'could not find target');
-        require(foundLeft, 'could not find left');
-        require(foundRight, 'could not find right');
-        require(totalReclaimed == guarantee.amount, 'totalReclaimed!=guarantee.amount');
+        require(foundTarget, "could not find target");
+        require(foundLeft, "could not find left");
+        require(foundRight, "could not find right");
+        require(totalReclaimed == guarantee.amount, "totalReclaimed!=guarantee.amount");
 
         return newSourceAllocations;
     }
@@ -375,18 +320,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         Outcome.SingleAssetExit[] memory sourceOutcome,
         Outcome.Allocation[] memory newSourceAllocations
     ) internal {
-        (bytes32 sourceChannelId, uint256 sourceAssetIndex) = (
-            reclaimArgs.sourceChannelId,
-            reclaimArgs.sourceAssetIndex
-        );
+        (bytes32 sourceChannelId, uint256 sourceAssetIndex) =
+            (reclaimArgs.sourceChannelId, reclaimArgs.sourceAssetIndex);
 
         // store fingerprint of modified source outcome
         sourceOutcome[sourceAssetIndex].allocations = newSourceAllocations;
-        _updateFingerprint(
-            sourceChannelId,
-            reclaimArgs.sourceStateHash,
-            keccak256(abi.encode(sourceOutcome))
-        );
+        _updateFingerprint(sourceChannelId, reclaimArgs.sourceStateHash, keccak256(abi.encode(sourceOutcome)));
 
         // emit the information needed to compute the new source outcome stored in the fingerprint
         emit Reclaimed(reclaimArgs.sourceChannelId, reclaimArgs.sourceAssetIndex);
@@ -420,8 +359,8 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      */
     function _transferAsset(address asset, address destination, uint256 amount) internal {
         if (asset == address(0)) {
-            (bool success, ) = destination.call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
-            require(success, 'Could not transfer ETH');
+            (bool success,) = destination.call{value: amount}(""); //solhint-disable-line avoid-low-level-calls
+            require(success, "Could not transfer ETH");
         } else {
             IERC20(asset).transfer(destination, amount);
         }
@@ -465,16 +404,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      * @notice Checks that a given variables hash to the data stored on chain.
      * @dev Checks that a given variables hash to the data stored on chain.
      */
-    function _requireMatchingFingerprint(
-        bytes32 stateHash,
-        bytes32 outcomeHash,
-        bytes32 channelId
-    ) internal view {
-        (, , uint160 fingerprint) = _unpackStatus(channelId);
-        require(
-            fingerprint == _generateFingerprint(stateHash, outcomeHash),
-            'incorrect fingerprint'
-        );
+    function _requireMatchingFingerprint(bytes32 stateHash, bytes32 outcomeHash, bytes32 channelId) internal view {
+        (,, uint160 fingerprint) = _unpackStatus(channelId);
+        require(fingerprint == _generateFingerprint(stateHash, outcomeHash), "incorrect fingerprint");
     }
 
     /**
@@ -483,19 +415,13 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      * @param channelId Unique identifier for a channel.
      */
     function _requireChannelFinalized(bytes32 channelId) internal view {
-        require(_mode(channelId) == ChannelMode.Finalized, 'Channel not finalized.');
+        require(_mode(channelId) == ChannelMode.Finalized, "Channel not finalized.");
     }
 
-    function _updateFingerprint(
-        bytes32 channelId,
-        bytes32 stateHash,
-        bytes32 outcomeHash
-    ) internal {
-        (uint48 turnNumRecord, uint48 finalizesAt, ) = _unpackStatus(channelId);
+    function _updateFingerprint(bytes32 channelId, bytes32 stateHash, bytes32 outcomeHash) internal {
+        (uint48 turnNumRecord, uint48 finalizesAt,) = _unpackStatus(channelId);
 
-        bytes32 newStatus = _generateStatus(
-            ChannelData(turnNumRecord, finalizesAt, stateHash, outcomeHash)
-        );
+        bytes32 newStatus = _generateStatus(ChannelData(turnNumRecord, finalizesAt, stateHash, outcomeHash));
         statusOf[channelId] = newStatus;
     }
 
@@ -505,7 +431,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      */
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
         for (uint256 i = 0; i + 1 < indices.length; i++) {
-            require(indices[i] < indices[i + 1], 'Indices must be sorted');
+            require(indices[i] < indices[i + 1], "Indices must be sorted");
         }
     }
 
