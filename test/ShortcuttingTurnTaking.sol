@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NitroUtils} from "../libraries/NitroUtils.sol";
-import {INitroTypes} from "../interfaces/INitroTypes.sol";
+import {NitroUtils} from "../src/libraries/NitroUtils.sol";
+import {INitroTypes} from "../src/interfaces/INitroTypes.sol";
 
 /**
  * @notice NOTE: Development of this signature logic was discontinued, but may be renewed in future. Use at your own risk.

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {INitroTypes} from "../interfaces/INitroTypes.sol";
-import {NitroUtils} from "../libraries/NitroUtils.sol";
+import {INitroTypes} from "../src/interfaces/INitroTypes.sol";
+import {NitroUtils} from "../src/libraries/NitroUtils.sol";
 
 /**
  * @dev This contract uses the NitroUtils library to enable it to be more easily unit-tested. It exposes public or external functions which call into internal functions. It should not be deployed in a production environment.

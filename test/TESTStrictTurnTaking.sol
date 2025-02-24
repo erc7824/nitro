@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {INitroTypes} from "../interfaces/INitroTypes.sol";
-import {StrictTurnTaking} from "../libraries/signature-logic/StrictTurnTaking.sol";
+import {INitroTypes} from "../src/interfaces/INitroTypes.sol";
+import {StrictTurnTaking} from "../src/libraries/signature-logic/StrictTurnTaking.sol";
 
 /**
  * @dev This contract uses the StrictTurnTaking library to make it more easily unit-tested. It exposes public or external functions which call into internal functions. It should not be deployed in a production environment.

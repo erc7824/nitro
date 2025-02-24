@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NitroAdjudicator} from "../NitroAdjudicator.sol";
+import {NitroAdjudicator} from "../src/NitroAdjudicator.sol";
 import {TESTForceMove} from "./TESTForceMove.sol";
 
 /**
