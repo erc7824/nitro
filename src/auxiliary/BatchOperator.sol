@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.20;
 
 import {MultiAssetHolder} from "../MultiAssetHolder.sol";
 
@@ -47,7 +47,7 @@ contract BatchOperator {
         require(channelIds.length == expectedHelds.length && expectedHelds.length == amounts.length, lengthsErr);
 
         IERC20(asset).safeTransferFrom(msg.sender, address(this), totalAmount);
-        IERC20(asset).safeApprove(address(adjudicator), totalAmount);
+        IERC20(asset).approve(address(adjudicator), totalAmount);
 
         for (uint256 i = 0; i < channelIds.length; i++) {
             adjudicator.deposit(asset, channelIds[i], expectedHelds[i], amounts[i]);

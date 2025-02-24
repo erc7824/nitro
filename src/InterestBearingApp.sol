@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.20;
 
 import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
 import {Consensus} from "./libraries/signature-logic/Consensus.sol";
-import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {ExitFormat as Outcome} from "exit-format/ExitFormat.sol";
 
 // InterestBearingApp is a ForceMoveApp that allows a lender to earn interest
 // on a deposit. It functions as a ConsensusApp with the following additional rule:

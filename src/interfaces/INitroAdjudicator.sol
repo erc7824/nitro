@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.20;
 
-import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {ExitFormat as Outcome} from "exit-format/ExitFormat.sol";
 import {IMultiAssetHolder} from "./IMultiAssetHolder.sol";
 import {IForceMove} from "./IForceMove.sol";
 

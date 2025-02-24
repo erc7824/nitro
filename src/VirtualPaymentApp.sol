@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.20;
 
 import {IForceMoveApp} from "./interfaces/IForceMoveApp.sol";
 import {NitroUtils} from "./libraries/NitroUtils.sol";
 import {INitroTypes} from "./interfaces/INitroTypes.sol";
-import {ExitFormat as Outcome} from "@statechannels/exit-format/contracts/ExitFormat.sol";
+import {ExitFormat as Outcome} from "exit-format/ExitFormat.sol";
 
 /**
  * @dev The VirtualPaymentApp contract complies with the ForceMoveApp interface and allows payments to be made virtually from Alice to Bob (participants[0] to participants[n+1], where n is the number of intermediaries).
