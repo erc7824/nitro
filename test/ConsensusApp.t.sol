@@ -51,8 +51,7 @@ contract ConsensusAppTest is Test {
      */
     function buildVariablePart() internal pure returns (INitroTypes.VariablePart memory) {
         // Minimal outcome array for demonstration
-        Outcome.SingleAssetExit[] memory emptyOutcome =
-            new Outcome.SingleAssetExit[](0);
+        Outcome.SingleAssetExit[] memory emptyOutcome = new Outcome.SingleAssetExit[](0);
 
         return INitroTypes.VariablePart({
             outcome: emptyOutcome,
@@ -72,14 +71,11 @@ contract ConsensusAppTest is Test {
         INitroTypes.VariablePart memory varPart = buildVariablePart();
 
         // Empty proof
-        INitroTypes.RecoveredVariablePart[] memory emptyProof =
-            new INitroTypes.RecoveredVariablePart[](0);
+        INitroTypes.RecoveredVariablePart[] memory emptyProof = new INitroTypes.RecoveredVariablePart[](0);
 
         // Candidate with bitmask=7 => all participants.
-        INitroTypes.RecoveredVariablePart memory candidate = INitroTypes.RecoveredVariablePart({
-            variablePart: varPart,
-            signedBy: 7
-        });
+        INitroTypes.RecoveredVariablePart memory candidate =
+            INitroTypes.RecoveredVariablePart({variablePart: varPart, signedBy: 7});
 
         // If it reverts, the test fails.
         vm.prank(participantA);
@@ -96,17 +92,14 @@ contract ConsensusAppTest is Test {
         INitroTypes.VariablePart memory varPart = buildVariablePart();
 
         // 1-element proof
-        INitroTypes.RecoveredVariablePart[] memory invalidProof =
-            new INitroTypes.RecoveredVariablePart[](1);
+        INitroTypes.RecoveredVariablePart[] memory invalidProof = new INitroTypes.RecoveredVariablePart[](1);
         invalidProof[0] = INitroTypes.RecoveredVariablePart({
             variablePart: varPart,
             signedBy: 7 // all participants
         });
 
-        INitroTypes.RecoveredVariablePart memory candidate = INitroTypes.RecoveredVariablePart({
-            variablePart: varPart,
-            signedBy: 7
-        });
+        INitroTypes.RecoveredVariablePart memory candidate =
+            INitroTypes.RecoveredVariablePart({variablePart: varPart, signedBy: 7});
 
         consensusApp.stateIsSupported(fixedPart, invalidProof, candidate);
     }
@@ -121,13 +114,10 @@ contract ConsensusAppTest is Test {
         INitroTypes.VariablePart memory varPart = buildVariablePart();
 
         // bitmask=3 => only 2 participants.
-        INitroTypes.RecoveredVariablePart memory candidate = INitroTypes.RecoveredVariablePart({
-            variablePart: varPart,
-            signedBy: 3
-        });
+        INitroTypes.RecoveredVariablePart memory candidate =
+            INitroTypes.RecoveredVariablePart({variablePart: varPart, signedBy: 3});
 
-        INitroTypes.RecoveredVariablePart[] memory emptyProof =
-            new INitroTypes.RecoveredVariablePart[](0);
+        INitroTypes.RecoveredVariablePart[] memory emptyProof = new INitroTypes.RecoveredVariablePart[](0);
 
         consensusApp.stateIsSupported(fixedPart, emptyProof, candidate);
     }
