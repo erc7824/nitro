@@ -1,0 +1,6 @@
+@openzeppelin/contracts/=lib/exit-format/lib/openzeppelin-contracts/contracts/
+erc4626-tests/=lib/exit-format/lib/openzeppelin-contracts/lib/erc4626-tests/
+exit-format/=lib/exit-format/src/
+forge-std/=lib/forge-std/src/
+halmos-cheatcodes/=lib/exit-format/lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/
+openzeppelin-contracts/=lib/exit-format/lib/openzeppelin-contracts/
